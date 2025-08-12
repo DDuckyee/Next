@@ -5,7 +5,12 @@
 
 import { useState, useCallback } from "react"
 import { useDropzone } from "react-dropzone"
-import { useUploadThing } from "@/lib/uploadthing"  // 경로 수정
+// import { useUploadThing } from "@/lib/uploadthing"  // 경로 수정
+// 기존
+// import { useUploadThing } from "@/lib/uploadthing"
+
+// 변경
+import { useUploadThing } from "@/lib/uploadthing-client"
 import Image from "next/image"
 
 export default function ImageUpload({ onUploadComplete, disabled }) {

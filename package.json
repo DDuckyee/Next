@@ -29,5 +29,17 @@
     "@tailwindcss/postcss": "^4",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.6"
+  },
+  "overrides": {
+    "react": "$react",
+    "react-dom": "$react-dom",
+    "@uploadthing/react": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    },
+    "react-dropzone": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    }
   }
 }
