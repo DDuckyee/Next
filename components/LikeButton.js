@@ -1,10 +1,9 @@
-// 좋아요 버튼 컴포넌트
-// 좋아요 토글과 개수를 실시간으로 업데이트합니다
-
+// Enhanced LikeButton Component with animations
 "use client"
 
 import { useState, useTransition } from "react"
 import { useSession } from "next-auth/react"
+import { Heart } from "lucide-react"
 import { toggleLike } from "@/actions/likes"
 
 export default function LikeButton({ postId, initialLikesCount, isLikedByUser }) {
@@ -12,6 +11,7 @@ export default function LikeButton({ postId, initialLikesCount, isLikedByUser })
   const [isPending, startTransition] = useTransition()
   const [likesCount, setLikesCount] = useState(initialLikesCount)
   const [isLiked, setIsLiked] = useState(isLikedByUser)
+  const [isAnimating, setIsAnimating] = useState(false)
 
   const handleLike = () => {
     if (!session) {
@@ -19,9 +19,14 @@ export default function LikeButton({ postId, initialLikesCount, isLikedByUser })
       return
     }
 
+    // 애니메이션 트리거
+    setIsAnimating(true)
+    setTimeout(() => setIsAnimating(false), 600)
+
     // 낙관적 UI 업데이트 (서버 응답 전에 미리 변경)
-    setIsLiked(!isLiked)
-    setLikesCount(prev => isLiked ? prev - 1 : prev + 1)
+    const newIsLiked = !isLiked
+    setIsLiked(newIsLiked)
+    setLikesCount(prev => newIsLiked ? prev + 1 : prev - 1)
 
     startTransition(async () => {
       try {
@@ -44,32 +49,58 @@ export default function LikeButton({ postId, initialLikesCount, isLikedByUser })
   }
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-1">
       <button
         onClick={handleLike}
         disabled={isPending}
-        className={`p-2 rounded-full transition-colors ${
-          isPending ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"
-        }`}
+        className={`
+          relative p-2 rounded-full transition-all duration-200 transform
+          ${isPending ? "opacity-50 cursor-not-allowed" : "hover:bg-red-50 active:scale-95"}
+          ${isAnimating ? "animate-bounceIn" : ""}
+        `}
       >
-        <svg 
-          className={`w-6 h-6 ${isLiked ? "fill-red-500 text-red-500" : "text-gray-600"}`}
-          fill={isLiked ? "currentColor" : "none"} 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={2} 
-            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" 
+        {/* Heart icon with animation */}
+        <div className="relative">
+          <Heart 
+            className={`
+              w-6 h-6 transition-all duration-300 transform
+              ${isLiked 
+                ? "fill-red-500 text-red-500 scale-110" 
+                : "text-gray-600 hover:text-red-500 scale-100"
+              }
+              ${isAnimating ? "animate-pulse" : ""}
+            `}
           />
-        </svg>
+          
+          {/* Floating hearts animation */}
+          {isAnimating && isLiked && (
+            <>
+              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 animate-bounce">
+                <Heart className="w-3 h-3 fill-red-400 text-red-400 opacity-80" />
+              </div>
+              <div className="absolute -top-1 -right-1 transform animate-ping">
+                <Heart className="w-2 h-2 fill-pink-400 text-pink-400 opacity-60" />
+              </div>
+              <div className="absolute -top-1 -left-1 transform animate-ping delay-100">
+                <Heart className="w-2 h-2 fill-red-300 text-red-300 opacity-60" />
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Ripple effect */}
+        {isAnimating && (
+          <div className="absolute inset-0 rounded-full bg-red-500 opacity-20 animate-ping"></div>
+        )}
       </button>
       
+      {/* Likes count with animation */}
       {likesCount > 0 && (
-        <span className="text-sm font-semibold text-gray-900">
-          좋아요 {likesCount.toLocaleString()}개
+        <span className={`
+          text-sm font-semibold text-gray-900 transition-all duration-300
+          ${isAnimating ? "animate-scaleIn text-red-500" : ""}
+        `}>
+          {likesCount.toLocaleString()}
         </span>
       )}
     </div>
